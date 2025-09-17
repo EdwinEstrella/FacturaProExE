@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura Pro - Sistema de Facturación</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 60 60' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='8' width='50' height='44' rx='4' fill='white' stroke='%231e3c72' stroke-width='2'/%3E%3Crect x='10' y='15' width='40' height='6' fill='%231e3c72'/%3E%3Crect x='10' y='25' width='30' height='4' fill='%232a5298'/%3E%3Crect x='10' y='32' width='35' height='4' fill='%232a5298'/%3E%3Crect x='10' y='39' width='25' height='4' fill='%232a5298'/%3E%3Crect x='45' y='45' width='8' height='4' fill='%231e3c72'/%3E%3Ctext x='30' y='52' text-anchor='middle' fill='%231e3c72' font-family='Arial, sans-serif' font-size='6' font-weight='bold'%3EFP%3C/text%3E%3C/svg%3E">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .logo-container {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .sidebar .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .sidebar .search-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            color: white;
+            padding: 8px 40px 8px 15px;
+            font-size: 14px;
+        }
+        .sidebar .search-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        .sidebar .search-input:focus {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.1);
+        }
+        .sidebar .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.6);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,.75);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,.15);
+            transform: translateX(5px);
+        }
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            font-size: 18px;
+        }
+        .sidebar .nav-text {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .sidebar .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar .user-info small {
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        .main-content {
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 15px;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.3);
+        }
+        .stats-icon {
+            opacity: 0.8;
+            font-size: 1.5rem;
+        }
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .btn-outline-primary:hover, .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-3">
+                <!-- Logo/Brand -->
+                <div class="text-center mb-4">
+                    <div class="logo-container mb-2">
+                        <svg width="40" height="40" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="5" y="8" width="50" height="44" rx="4" fill="white" stroke="white" stroke-width="2"/>
+                            <rect x="10" y="15" width="40" height="6" fill="#1e3c72"/>
+                            <rect x="10" y="25" width="30" height="4" fill="#2a5298"/>
+                            <rect x="10" y="32" width="35" height="4" fill="#2a5298"/>
+                            <rect x="10" y="39" width="25" height="4" fill="#2a5298"/>
+                            <rect x="45" y="45" width="8" height="4" fill="#1e3c72"/>
+                            <text x="30" y="52" text-anchor="middle" fill="#1e3c72" font-family="Arial, sans-serif" font-size="6" font-weight="bold">FACTURA</text>
+                        </svg>
+                    </div>
+                    <h5 class="text-white mb-0">Factura Pro</h5>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-4">
+                    <div class="search-container">
+                        <input type="text" class="form-control search-input" placeholder="Buscar..." id="sidebarSearch">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="facturacion">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="nav-text">Facturación</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="clientes">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Clientes</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="productos">
+                        <i class="fas fa-boxes"></i>
+                        <span class="nav-text">Productos</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="entradas">
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="nav-text">Entradas</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="devoluciones">
+                        <i class="fas fa-undo"></i>
+                        <span class="nav-text">Devoluciones</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="liquidaciones">
+                        <i class="fas fa-calculator"></i>
+                        <span class="nav-text">Liquidaciones</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="cuentas-cobrar">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="nav-text">Cuentas por Cobrar</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="contabilidad">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Contabilidad</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="reportes">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="nav-text">Reportes</span>
+                    </a>
+                    <a class="nav-link" href="#" data-section="soporte">
+                        <i class="fas fa-headset"></i>
+                        <span class="nav-text">Soporte</span>
+                    </a>
+                </nav>
+
+                <!-- User Section -->
+                <div class="mt-auto pt-3 border-top border-light">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="user-avatar me-2">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="user-info flex-grow-1">
+                            <small class="text-white d-block" id="userNombreDisplay">Usuario</small>
+                            <small class="text-light" id="userRolDisplay">Admin</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-cog"></i> Configurar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="card-title mb-1">
+                                                    <i class="fas fa-file-invoice-dollar"></i> Facturas Hoy
+                                                </h5>
+                                                <h3 id="facturas-hoy" class="mb-0">0</h3>
+                                            </div>
+                                            <div class="stats-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-light opacity-75">+12% vs ayer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="card-title mb-1">
+                                                    <i class="fas fa-dollar-sign"></i> Ventas del Día
+                                                </h5>
+                                                <h3 id="ventas-hoy" class="mb-0">RD$0.00</h3>
+                                            </div>
+                                            <div class="stats-icon">
+                                                <i class="fas fa-trending-up"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-light opacity-75">+8.5% vs ayer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="card-title mb-1">
+                                                    <i class="fas fa-users"></i> Total Clientes
+                                                </h5>
+                                                <h3 id="total-clientes" class="mb-0">0</h3>
+                                            </div>
+                                            <div class="stats-icon">
+                                                <i class="fas fa-user-plus"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-light opacity-75">3 nuevos esta semana</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="card-title mb-1">
+                                                    <i class="fas fa-boxes"></i> Productos en Stock
+                                                </h5>
+                                                <h3 id="productos-stock" class="mb-0">0</h3>
+                                            </div>
+                                            <div class="stats-icon">
+                                                <i class="fas fa-warehouse"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-light opacity-75">95% capacidad</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" onclick="mostrarSeccion('facturacion')">
+                                                <i class="fas fa-plus-circle"></i>
+                                                Nueva Factura
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" onclick="mostrarSeccion('clientes')">
+                                                <i class="fas fa-user-plus"></i>
+                                                Agregar Cliente
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-info w-100 d-flex align-items-center justify-content-center gap-2" onclick="mostrarSeccion('productos')">
+                                                <i class="fas fa-box-open"></i>
+                                                Nuevo Producto
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-warning w-100 d-flex align-items-center justify-content-center gap-2" onclick="mostrarSeccion('reportes')">
+                                                <i class="fas fa-chart-bar"></i>
+                                                Ver Reportes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-clock"></i> Actividad Reciente</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="activity-list">
+                                        <div class="activity-item d-flex align-items-center mb-3">
+                                            <div class="activity-icon me-3">
+                                                <i class="fas fa-file-invoice text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title">Factura #001 creada</div>
+                                                <small class="text-muted">Hace 2 horas</small>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item d-flex align-items-center mb-3">
+                                            <div class="activity-icon me-3">
+                                                <i class="fas fa-user-plus text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title">Nuevo cliente registrado</div>
+                                                <small class="text-muted">Hace 4 horas</small>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item d-flex align-items-center mb-3">
+                                            <div class="activity-icon me-3">
+                                                <i class="fas fa-box text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title">Producto agregado al inventario</div>
+                                                <small class="text-muted">Hace 6 horas</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Alertas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <strong>Stock Bajo:</strong> 3 productos necesitan reposición
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-clock"></i>
+                                        <strong>Recordatorio:</strong> Revisar cuentas por cobrar
+                                    </div>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong>Éxito:</strong> Backup completado automáticamente
+                                    </div>
+                                </div>
+                            </div>
+            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facturación Section -->
+                <div id="facturacion" class="section">
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Facturación</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="clienteForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="clienteNombre">Buscar Cliente:</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="clienteNombre" placeholder="Nombre o RNC del cliente" autocomplete="off">
+                                            <button class="btn btn-outline-secondary" type="button" id="buscarClienteBtn">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                        <div id="clienteResultados" class="mt-2" style="display: none;">
+                                            <div class="list-group" id="clienteLista">
+                                                <!-- Resultados de búsqueda aparecerán aquí -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Cliente Seleccionado:</label>
+                                        <div class="border p-2 rounded" id="clienteSeleccionado">
+                                            <small class="text-muted">Ningún cliente seleccionado</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <hr>
+                            <h4>Productos</h4>
+                            <button class="btn btn-primary mb-3" id="agregarProducto">
+                                <i class="fas fa-plus"></i> Agregar Producto
+                            </button>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="productosTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Stock Disponible</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Subtotal</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productosBody">
+                                        <!-- Productos se agregarán aquí dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-success mt-3" id="agregarProductoFactura">
+                                <i class="fas fa-plus"></i> Agregar Producto
+                            </button>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label for="itbisPorcentaje">ITBIS %:</label>
+                                    <input type="number" class="form-control" id="itbisPorcentaje" value="18" step="0.01">
+                                </div>
+                            </div>
+
+                            <div class="card mt-3 bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <h5>Subtotal: <span id="subtotal" class="text-primary">RD$0.00</span></h5>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5>ITBIS: <span id="itbisMonto" class="text-primary">RD$0.00</span></h5>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5>Total: <span id="total" class="text-success">RD$0.00</span></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <button class="btn btn-success me-2" id="guardarFactura">
+                                    <i class="fas fa-save"></i> Guardar Factura
+                                </button>
+                                <button class="btn btn-info" id="generarPDF">
+                                    <i class="fas fa-file-pdf"></i> Generar PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clientes Section -->
+                <div id="clientes" class="section">
+                    <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <input type="text" class="form-control w-50" id="buscarCliente" placeholder="Buscar cliente...">
+                                <button class="btn btn-primary" id="agregarCliente">
+                                    <i class="fas fa-plus"></i> Agregar Cliente
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="clientesTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>RNC</th>
+                                            <th>Teléfono</th>
+                                            <th>Email</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clientesBody">
+                                        <!-- Clientes se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Productos Section -->
+                <div id="productos" class="section">
+                    <h2><i class="fas fa-boxes"></i> Gestión de Productos</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <input type="text" class="form-control w-50" id="buscarProducto" placeholder="Buscar producto...">
+                                <button class="btn btn-primary" id="agregarProductoInv">
+                                    <i class="fas fa-plus"></i> Agregar Producto
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="productosInvTable">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Categoría</th>
+                                                <th>Precio Venta</th>
+                                                <th>Precio Compra</th>
+                                                <th>Stock</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="productosInvBody">
+                                            <!-- Productos se cargarán aquí -->
+                                        </tbody>
+                                    </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entradas Section -->
+                <div id="entradas" class="section">
+                    <h2><i class="fas fa-plus-circle"></i> Entradas de Productos</h2>
+
+                    <!-- Pestañas para Entradas y Facturas -->
+                    <ul class="nav nav-tabs mb-4" id="entradasTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="entradas-tab" data-bs-toggle="tab" data-bs-target="#entradas-content" type="button" role="tab">Entradas</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="facturas-tab" data-bs-toggle="tab" data-bs-target="#facturas-content" type="button" role="tab">Facturas</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="entradasTabContent">
+                        <!-- Contenido de Entradas -->
+                        <div class="tab-pane fade show active" id="entradas-content" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <h5>Registrar Nueva Entrada</h5>
+                                        <button class="btn btn-primary" id="nuevaEntrada">
+                                            <i class="fas fa-plus"></i> Nueva Entrada
+                                        </button>
+                                    </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="entradaProducto" class="form-label">Producto *</label>
+                                    <select class="form-control" id="entradaProducto" required>
+                                        <option value="">Seleccionar producto...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="entradaCantidad" class="form-label">Cantidad *</label>
+                                    <input type="number" class="form-control" id="entradaCantidad" min="1" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="entradaPrecioCompra" class="form-label">Precio Compra *</label>
+                                    <input type="number" class="form-control" id="entradaPrecioCompra" step="0.01" min="0" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="entradaPrecioVenta" class="form-label">Precio Venta Sugerido</label>
+                                    <input type="number" class="form-control" id="entradaPrecioVenta" step="0.01" min="0">
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="entradaProveedor" class="form-label">Proveedor</label>
+                                    <input type="text" class="form-control" id="entradaProveedor">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="entradaFactura" class="form-label">Número de Factura</label>
+                                    <input type="text" class="form-control" id="entradaFactura">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="entradaNotas" class="form-label">Notas</label>
+                                <textarea class="form-control" id="entradaNotas" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <button class="btn btn-success" id="registrarEntrada">
+                                    <i class="fas fa-save"></i> Registrar Entrada
+                                </button>
+                                <button class="btn btn-secondary ms-2" id="limpiarEntrada">
+                                    <i class="fas fa-eraser"></i> Limpiar
+                                </button>
+                            </div>
+
+                            <hr>
+
+                            <h5>Historial de Entradas</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="entradasTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Compra</th>
+                                            <th>Proveedor</th>
+                                            <th>Factura</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="entradasBody">
+                                        <!-- Entradas se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+
+                        <!-- Contenido de Facturas -->
+                        <div class="tab-pane fade" id="facturas-content" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <h5>Facturas Guardadas</h5>
+                                        <div>
+                                            <button class="btn btn-success me-2" id="nuevaFacturaEntrada">
+                                                <i class="fas fa-plus"></i> Nueva Factura
+                                            </button>
+                                            <button class="btn btn-info" id="recargarFacturas">
+                                                <i class="fas fa-sync"></i> Recargar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lista de Facturas -->
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-striped" id="facturasTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Cliente</th>
+                                                    <th>Fecha</th>
+                                                    <th>Total</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="facturasBody">
+                                                <!-- Facturas se cargarán aquí -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="devoluciones" class="section">
+                    <h2><i class="fas fa-undo"></i> Devoluciones</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Módulo de devoluciones en desarrollo...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liquidaciones Section -->
+                <div id="liquidaciones" class="section">
+                    <h2><i class="fas fa-calculator"></i> Liquidaciones</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5>Crear Nueva Liquidación</h5>
+                                <button class="btn btn-primary" id="nuevaLiquidacion">
+                                    <i class="fas fa-plus"></i> Nueva Liquidación
+                                </button>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="liquidacionFechaInicio" class="form-label">Fecha Inicio *</label>
+                                    <input type="date" class="form-control" id="liquidacionFechaInicio" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="liquidacionFechaFin" class="form-label">Fecha Fin *</label>
+                                    <input type="date" class="form-control" id="liquidacionFechaFin" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="liquidacionNotas" class="form-label">Notas</label>
+                                <textarea class="form-control" id="liquidacionNotas" rows="3" placeholder="Observaciones sobre la liquidación..."></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <button class="btn btn-success" id="crearLiquidacion">
+                                    <i class="fas fa-calculator"></i> Calcular Liquidación
+                                </button>
+                                <button class="btn btn-secondary ms-2" id="limpiarLiquidacion">
+                                    <i class="fas fa-eraser"></i> Limpiar
+                                </button>
+                            </div>
+
+                            <!-- Resultado de la liquidación -->
+                            <div id="resultadoLiquidacion" class="mb-4" style="display: none;">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Resultado de la Liquidación</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <h4 class="text-primary" id="totalVentasLiq">RD$0.00</h4>
+                                                    <small>Total Ventas</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <h4 class="text-danger" id="totalCostosLiq">RD$0.00</h4>
+                                                    <small>Total Costos</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <h4 class="text-info" id="totalItbisLiq">RD$0.00</h4>
+                                                    <small>ITBIS</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-center">
+                                                    <h4 class="text-success" id="totalGananciasLiq">RD$0.00</h4>
+                                                    <small>Ganancias</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-center">
+                                            <button class="btn btn-primary" id="guardarLiquidacion">
+                                                <i class="fas fa-save"></i> Guardar Liquidación
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h5>Historial de Liquidaciones</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="liquidacionesTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Período</th>
+                                            <th>Ventas</th>
+                                            <th>Costos</th>
+                                            <th>Ganancias</th>
+                                            <th>Estado</th>
+                                            <th>Fecha</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="liquidacionesBody">
+                                        <!-- Liquidaciones se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cuentas-cobrar" class="section">
+                    <h2><i class="fas fa-money-bill-wave"></i> Cuentas por Cobrar</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Módulo de cuentas por cobrar en desarrollo...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contabilidad Section -->
+                <div id="contabilidad" class="section">
+                    <h2><i class="fas fa-chart-line"></i> Contabilidad</h2>
+
+                    <!-- KPIs Principales -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">Ventas del Día</h5>
+                                            <h3 id="kpi-ventas-hoy">RD$0.00</h3>
+                                        </div>
+                                        <div class="stats-icon">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light opacity-75">+15.3% vs ayer</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">Margen de Ganancia</h5>
+                                            <h3 id="kpi-margen">0.0%</h3>
+                                        </div>
+                                        <div class="stats-icon">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light opacity-75">Promedio 30 días</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">Cuentas por Cobrar</h5>
+                                            <h3 id="kpi-cuentas-cobrar">RD$0.00</h3>
+                                        </div>
+                                        <div class="stats-icon">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light opacity-75">Monto pendiente</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card text-white h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">Productos Bajos</h5>
+                                            <h3 id="kpi-stock-bajo">0</h3>
+                                        </div>
+                                        <div class="stats-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-light opacity-75">Necesitan reposición</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Contabilidad -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-balance-scale"></i> Estado de Resultados</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h6 class="text-success">Ingresos</h6>
+                                            <p class="h4 text-success" id="ingresos-totales">RD$0.00</p>
+                                            <small class="text-muted">Este mes</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-danger">Egresos</h6>
+                                            <p class="h4 text-danger" id="egresos-totales">RD$0.00</p>
+                                            <small class="text-muted">Costos + ITBIS</small>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h6 class="text-primary">Utilidad Neta</h6>
+                                            <p class="h3 text-primary" id="utilidad-neta">RD$0.00</p>
+                                            <small class="text-muted">Después de ITBIS</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Análisis de Costos</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Costo de Productos</span>
+                                            <span id="costo-productos">RD$0.00</span>
+                                        </div>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-danger" role="progressbar" id="costo-productos-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>ITBIS</span>
+                                            <span id="costo-itbis">RD$0.00</span>
+                                        </div>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-warning" role="progressbar" id="costo-itbis-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Otros Costos</span>
+                                            <span id="otros-costos">RD$0.00</span>
+                                        </div>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-info" role="progressbar" id="otros-costos-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movimientos Recientes -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-history"></i> Movimientos Recientes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="movimientosTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Tipo</th>
+                                                    <th>Producto</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Stock Anterior</th>
+                                                    <th>Stock Nuevo</th>
+                                                    <th>Referencia</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="movimientosBody">
+                                                <!-- Movimientos se cargarán aquí -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reportes Section -->
+                <div id="reportes" class="section">
+                    <h2><i class="fas fa-chart-bar"></i> Reportes</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card text-center mb-3">
+                                        <div class="card-body">
+                                            <i class="fas fa-file-invoice-dollar fa-2x text-primary mb-2"></i>
+                                            <h6>Reporte de Ventas</h6>
+                                            <button class="btn btn-outline-primary btn-sm">Generar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center mb-3">
+                                        <i class="fas fa-boxes fa-2x text-success mb-2"></i>
+                                        <div class="card-body">
+                                            <h6>Reporte de Inventario</h6>
+                                            <button class="btn btn-outline-success btn-sm">Generar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center mb-3">
+                                        <i class="fas fa-users fa-2x text-info mb-2"></i>
+                                        <div class="card-body">
+                                            <h6>Reporte de Clientes</h6>
+                                            <button class="btn btn-outline-info btn-sm">Generar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soporte Section -->
+                <div id="soporte" class="section">
+                    <h2><i class="fas fa-headset"></i> Panel de Administración</h2>
+
+                    <!-- Pestañas de Administración -->
+                    <ul class="nav nav-tabs mb-4" id="soporteTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios-panel" type="button" role="tab">Usuarios</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="empresa-tab" data-bs-toggle="tab" data-bs-target="#empresa-panel" type="button" role="tab">Empresa</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sistema-tab" data-bs-toggle="tab" data-bs-target="#sistema-panel" type="button" role="tab">Sistema</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="soporteTabContent">
+                        <!-- Panel de Usuarios -->
+                        <div class="tab-pane fade show active" id="usuarios-panel" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-users-cog"></i> Gestión de Usuarios</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <h6>Usuarios del Sistema</h6>
+                                        <button class="btn btn-primary btn-sm" id="agregarUsuario">
+                                            <i class="fas fa-plus"></i> Nuevo Usuario
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="usuariosTable">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>Usuario</th>
+                                                    <th>Nombre</th>
+                                                    <th>Rol</th>
+                                                    <th>Estado</th>
+                                                    <th>Último Acceso</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="usuariosBody">
+                                                <!-- Usuarios se cargarán aquí -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Empresa -->
+                        <div class="tab-pane fade" id="empresa-panel" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fas fa-building"></i> Información de Empresa</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="empresaForm">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Nombre de Empresa</label>
+                                                    <input type="text" class="form-control" id="empresaNombre" value="Sistema Web S.A. de C.V.">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Dirección</label>
+                                                    <input type="text" class="form-control" id="empresaDireccion" value="234/90, New York Street">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Teléfono</label>
+                                                    <input type="text" class="form-control" id="empresaTelefono" value="+456-345-908-559">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email</label>
+                                                    <input type="email" class="form-control" id="empresaEmail" value="info@obedalvarado.pw">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">RNC</label>
+                                                    <input type="text" class="form-control" id="empresaRNC">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fas fa-cogs"></i> Configuración General</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Moneda</label>
+                                                <select class="form-control" id="empresaMoneda">
+                                                    <option value="RD$">Peso Dominicano (RD$)</option>
+                                                    <option value="USD">Dólar (USD)</option>
+                                                    <option value="EUR">Euro (€)</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">IVA Por Defecto (%)</label>
+                                                <input type="number" class="form-control" id="empresaIVA" value="18" min="0" max="100">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Logo de Empresa</label>
+                                                <input type="file" class="form-control" id="empresaLogo" accept="image/*">
+                                                <small class="text-muted">Formatos: PNG, JPG, GIF. Máx 2MB</small>
+                                            </div>
+                                            <button class="btn btn-primary w-100">Actualizar Configuración</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Sistema -->
+                        <div class="tab-pane fade" id="sistema-panel" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fas fa-tools"></i> Herramientas del Sistema</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <button class="btn btn-warning w-100" id="backupDatabase">
+                                                        <i class="fas fa-database"></i> Backup de Base de Datos
+                                                    </button>
+                                                </div>
+                                                <div class="col-12">
+                                                    <button class="btn btn-danger w-100" id="limpiarDatosPrueba">
+                                                        <i class="fas fa-trash"></i> Limpiar Datos de Prueba
+                                                    </button>
+                                                </div>
+                                                <div class="col-12">
+                                                    <button class="btn btn-info w-100" id="limpiarCache">
+                                                        <i class="fas fa-broom"></i> Limpiar Cache
+                                                    </button>
+                                                </div>
+                                                <div class="col-12">
+                                                    <button class="btn btn-secondary w-100" id="verLogs">
+                                                        <i class="fas fa-file-alt"></i> Ver Logs del Sistema
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información del Sistema</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <small class="text-muted">Versión</small>
+                                                    <p class="mb-2">1.0.0</p>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Base de Datos</small>
+                                                    <p class="mb-2">SQLite 3</p>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Usuario Actual</small>
+                                                    <p class="mb-2" id="usuarioActual">Cargando...</p>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Último Backup</small>
+                                                    <p class="mb-2" id="ultimoBackup">Nunca</p>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div>
+                                                <small class="text-muted">Impresoras Conectadas</small>
+                                                <div id="listaImpresoras" class="mt-2">
+                                                    <small class="text-muted">Cargando impresoras...</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cliente -->
+    <div class="modal fade" id="clienteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clienteModalTitle">Agregar Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clienteFormModal">
+                        <div class="mb-3">
+                            <label for="clienteNombreModal" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="clienteNombreModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteRNCModal" class="form-label">RNC</label>
+                            <input type="text" class="form-control" id="clienteRNCModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteTelefonoModal" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="clienteTelefonoModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteEmailModal" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="clienteEmailModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="clienteDireccionModal" class="form-label">Dirección</label>
+                            <textarea class="form-control" id="clienteDireccionModal" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarCliente">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Producto -->
+    <div class="modal fade" id="productoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productoModalTitle">Agregar Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productoFormModal">
+                        <div class="mb-3">
+                            <label for="productoCodigoModal" class="form-label">Código *</label>
+                            <input type="text" class="form-control" id="productoCodigoModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productoNombreModal" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="productoNombreModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productoDescripcionModal" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="productoDescripcionModal" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="productoPrecioVentaModal" class="form-label">Precio Venta *</label>
+                                <input type="number" class="form-control" id="productoPrecioVentaModal" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productoPrecioCompraModal" class="form-label">Precio Compra</label>
+                                <input type="number" class="form-control" id="productoPrecioCompraModal" step="0.01" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="productoStockModal" class="form-label">Stock Inicial</label>
+                                <input type="number" class="form-control" id="productoStockModal" min="0" value="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productoStockMinModal" class="form-label">Stock Mínimo</label>
+                                <input type="number" class="form-control" id="productoStockMinModal" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productoCategoriaModal" class="form-label">Categoría</label>
+                            <input type="text" class="form-control" id="productoCategoriaModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="productoProveedorModal" class="form-label">Proveedor</label>
+                            <input type="text" class="form-control" id="productoProveedorModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="productoUbicacionModal" class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" id="productoUbicacionModal">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarProducto">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="notificationToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="notificationMessage">
+                    <!-- Message will be inserted here -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Usuario -->
+    <div class="modal fade" id="usuarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="usuarioModalTitle">Agregar Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="usuarioFormModal">
+                        <div class="mb-3">
+                            <label for="usuarioUsernameModal" class="form-label">Usuario *</label>
+                            <input type="text" class="form-control" id="usuarioUsernameModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usuarioPasswordModal" class="form-label">Contraseña *</label>
+                            <input type="password" class="form-control" id="usuarioPasswordModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usuarioNombreModal" class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="usuarioNombreModal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usuarioEmailModal" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="usuarioEmailModal">
+                        </div>
+                        <div class="mb-3">
+                            <label for="usuarioRolModal" class="form-label">Rol *</label>
+                            <select class="form-control" id="usuarioRolModal" required>
+                                <option value="usuario">Usuario</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarUsuario">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Factura con Plantilla HTML -->
+    <div class="modal fade" id="facturaModal" tabindex="-1" style="max-width: 90%; margin: auto;">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="facturaModalTitle">Factura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <!-- Plantilla HTML integrada -->
+                    <div id="facturaTemplate" style="max-height: 70vh; overflow-y: auto;">
+                        <div class="control-bar" style="background: #f8f9fa; padding: 20px; border-bottom: 1px solid #dee2e6;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-2-4">
+                                        <div class="slogan" style="font-weight: bold; margin-bottom: 10px;">Facturación</div>
+                                        <label for="config_tax" style="display: inline-block; margin-right: 15px;">
+                                            IVA:
+                                            <input type="checkbox" id="config_tax" />
+                                        </label>
+                                        <label for="config_tax_rate" class="taxrelated" style="display: inline-block; margin-right: 15px;">
+                                            Tasa:
+                                            <input type="text" id="config_tax_rate" value="18" style="width: 60px;"/>%
+                                        </label>
+                                        <label for="config_note" style="display: inline-block;">
+                                            Nota:
+                                            <input type="checkbox" id="config_note" />
+                                        </label>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <header class="row" style="padding: 30px;">
+                            <div class="logoholder text-center" style="margin-bottom: 30px;">
+                                <img src="assets/img/logo.png" alt="Logo" style="max-height: 100px;" onerror="this.style.display='none'">
+                                <div style="font-size: 24px; font-weight: bold; color: #1e3c72;">Sistema Web S.A. de C.V.</div>
+                            </div>
+
+                            <div class="me" style="margin-bottom: 20px;">
+                                <p contenteditable style="border: 1px dashed #dee2e6; padding: 10px; min-height: 80px;">
+                                    <strong>Sistema Web S.A. de C.V.</strong><br>
+                                    234/90, New York Street<br>
+                                    United States.<br>
+                                </p>
+                            </div>
+
+                            <div class="info" style="margin-bottom: 20px;">
+                                <p contenteditable style="border: 1px dashed #dee2e6; padding: 10px; min-height: 60px;">
+                                    Web: <a href="http://volkerotto.net">www.sistemasweb.la</a><br>
+                                    E-mail: <a href="mailto:info@obedalvarado.pw">info@obedalvarado.pw</a><br>
+                                    Tel: +456-345-908-559<br>
+                                    Twitter: @alvarado_obed
+                                </p>
+                            </div>
+
+                            <div class="bank" style="margin-bottom: 20px;">
+                                <p contenteditable style="border: 1px dashed #dee2e6; padding: 10px; min-height: 60px;">
+                                    Datos bancarios: <br>
+                                    Titular de la cuenta: <br>
+                                    IBAN: <br>
+                                    BIC:
+                                </p>
+                            </div>
+                        </header>
+
+                        <div class="row section" style="padding: 0 30px 20px;">
+                            <div class="col-2">
+                                <h1 contenteditable style="border: 1px dashed #dee2e6; padding: 10px;">Factura</h1>
+                            </div>
+
+                            <div class="col-2 text-right details">
+                                <p contenteditable style="border: 1px dashed #dee2e6; padding: 10px; min-height: 80px;">
+                                    Fecha: <input type="text" class="datePicker" /><br>
+                                    Factura #: <input type="text" value="100" /><br>
+                                    Vence: <input class="twoweeks" type="text"/>
+                                </p>
+                            </div>
+
+                            <div class="col-2" style="margin-top: 20px;">
+                                <p contenteditable class="client" style="border: 1px dashed #dee2e6; padding: 10px; min-height: 80px;">
+                                    <strong>Facturar a</strong><br>
+                                    [Nombre cliente]<br>
+                                    [Nombre empresa]<br>
+                                    [Dirección empresa]<br>
+                                    [Tel empresa]
+                                </p>
+                            </div>
+
+                            <div class="col-2" style="margin-top: 20px;">
+                                <p contenteditable class="client" style="border: 1px dashed #dee2e6; padding: 10px; min-height: 80px;">
+                                    <strong>Enviar a</strong><br>
+                                    [Nombre cliente]<br>
+                                    [Nombre empresa]<br>
+                                    [Dirección empresa]<br>
+                                    [Tel empresa]
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row section" style="padding: 0 30px 20px; margin-top: -20px;">
+                            <div class="col-1">
+                                <table style='width:100%; border-collapse: collapse;'>
+                                    <thead contenteditable style="background: #f8f9fa;">
+                                        <tr class="invoice_detail" style="border: 1px solid #dee2e6;">
+                                            <th width="25%" style="padding: 10px; border: 1px solid #dee2e6;">Vendedor</th>
+                                            <th width="25%" style="padding: 10px; border: 1px solid #dee2e6;">Orden de compra</th>
+                                            <th width="20%" style="padding: 10px; border: 1px solid #dee2e6;">Enviar por</th>
+                                            <th width="30%" style="padding: 10px; border: 1px solid #dee2e6;">Términos y condiciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody contenteditable style="border: 1px solid #dee2e6;">
+                                        <tr class="invoice_detail">
+                                            <td width="25%" style="padding: 10px; border: 1px solid #dee2e6;">John Doe</td>
+                                            <td width="25%" style="padding: 10px; border: 1px solid #dee2e6;">#PO-2020</td>
+                                            <td width="20%" style="padding: 10px; border: 1px solid #dee2e6;">DHL</td>
+                                            <td width="30%" style="padding: 10px; border: 1px solid #dee2e6;">Pago al contado</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="invoicelist-body" style="padding: 0 30px 20px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead contenteditable style="background: #f8f9fa;">
+                                    <tr style="border: 1px solid #dee2e6;">
+                                        <th width="5%" style="padding: 10px; border: 1px solid #dee2e6;">Código</th>
+                                        <th width="60%" style="padding: 10px; border: 1px solid #dee2e6;">Descripción</th>
+                                        <th width="10%" style="padding: 10px; border: 1px solid #dee2e6;">Cant.</th>
+                                        <th width="15%" style="padding: 10px; border: 1px solid #dee2e6;">Precio</th>
+                                        <th class="taxrelated" style="padding: 10px; border: 1px solid #dee2e6;">IVA</th>
+                                        <th width="10%" style="padding: 10px; border: 1px solid #dee2e6;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productosFacturaBody">
+                                    <tr>
+                                        <td width='5%' style="padding: 10px; border: 1px solid #dee2e6;">
+                                            <button class="btn btn-sm btn-danger" onclick="eliminarFilaProducto(this)">x</button>
+                                            <span contenteditable>12345</span>
+                                        </td>
+                                        <td width='60%' style="padding: 10px; border: 1px solid #dee2e6;">
+                                            <span contenteditable>Descripción del producto</span>
+                                        </td>
+                                        <td class="amount" style="padding: 10px; border: 1px solid #dee2e6;">
+                                            <input type="text" value="1" onchange="calcularTotalFactura()" style="width: 100%; border: none; background: transparent;"/>
+                                        </td>
+                                        <td class="rate" style="padding: 10px; border: 1px solid #dee2e6;">
+                                            <input type="text" value="99" onchange="calcularTotalFactura()" style="width: 100%; border: none; background: transparent;"/>
+                                        </td>
+                                        <td class="tax taxrelated" style="padding: 10px; border: 1px solid #dee2e6;"></td>
+                                        <td class="sum" style="padding: 10px; border: 1px solid #dee2e6;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-primary btn-sm mt-3" onclick="agregarFilaProducto()">
+                                <i class="fas fa-plus"></i> Nueva fila
+                            </button>
+                        </div>
+
+                        <div class="invoicelist-footer" style="padding: 0 30px 20px;">
+                            <table contenteditable style="width: 100%; border-collapse: collapse;">
+                                <tr class="taxrelated" style="border: 1px solid #dee2e6;">
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;">IVA:</td>
+                                    <td id="total_tax_factura" style="padding: 10px; border: 1px solid #dee2e6;"></td>
+                                </tr>
+                                <tr style="border: 1px solid #dee2e6;">
+                                    <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>Total:</strong></td>
+                                    <td id="total_price_factura" style="padding: 10px; border: 1px solid #dee2e6;"></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="note" contenteditable style="padding: 0 30px 30px;">
+                            <h2>Nota:</h2>
+                            <p style="border: 1px dashed #dee2e6; padding: 10px; min-height: 60px;">Notas adicionales...</p>
+                        </div>
+
+                        <footer class="row" style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #dee2e6;">
+                            <div class="col-1 text-center">
+                                <p class="notaxrelated" contenteditable style="margin: 0;">
+                                    El monto de la factura no incluye el impuesto sobre las ventas.
+                                </p>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="guardarFacturaTemplate">
+                        <i class="fas fa-save"></i> Guardar Factura
+                    </button>
+                    <button type="button" class="btn btn-info" id="generarPDFFactura">
+                        <i class="fas fa-file-pdf"></i> Generar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>

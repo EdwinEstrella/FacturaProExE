@@ -1,0 +1,68 @@
+{
+  "name": "factura-pro",
+  "version": "1.0.0",
+  "description": "Sistema de facturación con Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "dist": "electron-builder --publish=never",
+    "publish": "electron-builder --publish=always",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.sistemafacturacion.app",
+    "productName": "Sistema de Gestión Empresarial",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!build/**/*",
+      "!*.md",
+      "!eslint.config.js"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sistema Facturación"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "tu-usuario",
+      "repo": "sistema-facturacion"
+    }
+  },
+  "keywords": [
+    "facturacion",
+    "electron",
+    "itbis"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bootstrap": "^5.3.8",
+    "electron-log": "^5.0.1",
+    "electron-updater": "^6.1.7",
+    "pdfkit": "^0.17.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "electron": "^25.9.8",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.35.0"
+  }
+}
