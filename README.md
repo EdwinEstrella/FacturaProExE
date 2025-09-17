@@ -148,42 +148,66 @@ jobs:
 
 ## 👥 Distribución a Usuarios Finales
 
-### Crear Primer Release
+### 🚀 Método Recomendado: GitHub Actions (Automático)
 
-Para crear tu primer release ejecutable:
+#### Configuración Inicial
+
+1. **Ve a tu repositorio:**
+   ```
+   https://github.com/EdwinEstrella/FacturaProExE
+   ```
+
+2. **Activa GitHub Actions:**
+   - Ve a la pestaña **"Actions"**
+   - Si está desactivado, actívalo
+
+3. **Verifica el workflow:**
+   - Deberías ver **"Release"** en la lista de workflows
+
+#### Crear Release Automático
 
 ```bash
-# Método automático (recomendado)
-npm run distribute
+# Para corrección de bug (1.0.0 → 1.0.1)
+npm run release
 
-# O método manual
-npm run build-win-setup
+# Para nueva funcionalidad (1.0.0 → 1.1.0)
+npm run release-minor
+
+# Para cambio mayor (1.0.0 → 2.0.0)
+npm run release-major
 ```
 
-### Publicar en GitHub
+#### Seguimiento del Proceso
 
-1. **Ve a la página de releases:**
+1. **Ve a la pestaña "Actions"** en GitHub
+2. **Verás el workflow ejecutándose**
+3. **Cuando termine**, ve a **"Releases"**
+4. **Edita el release** (estará en borrador)
+5. **Publica el release**
+
+### 📦 Método Manual (Si GitHub Actions no funciona)
+
+```bash
+# Construir instalador localmente
+npm run build-win-setup
+
+# Subir manualmente a GitHub Releases
+```
+
+### Descarga e Instalación para Usuarios
+
+1. **Ir a:**
    ```
    https://github.com/EdwinEstrella/FacturaProExE/releases
    ```
 
-2. **Crea un nuevo release:**
-   - Tag: `v1.0.0`
-   - Título: `FacturaPro ExE v1.0.0`
-   - Descripción: Copia de `RELEASE_TEMPLATE.md`
+2. **Descargar el instalador** más reciente (.exe)
 
-3. **Adjunta el instalador:**
-   - Archivo: `dist/FacturaPro ExE 1.0.0.exe`
+3. **Ejecutar el instalador** y seguir las instrucciones
 
-### Descarga e Instalación para Usuarios
-
-1. **Descargar el instalador** desde la página de releases
-
-2. **Ejecutar el instalador** y seguir las instrucciones
-
-3. **Primer uso:**
+4. **Primer uso:**
    - Usuario: `soporte`
-   - Contraseña: `[Configurada en el sistema]`
+   - Contraseña: `@Teamo1110a`
 
 ### Actualizaciones Automáticas
 

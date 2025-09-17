@@ -107,6 +107,7 @@ dist/*.exe
 !README.md
 !DISTRIBUCION.md
 !RELEASE_TEMPLATE.md
+!GITHUB_ACTIONS_GUIA.md
 !assets/README.md
 
 # OS generated files
