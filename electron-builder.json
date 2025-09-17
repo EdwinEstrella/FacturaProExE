@@ -1,0 +1,48 @@
+{
+  "appId": "com.facturapro.app",
+  "productName": "FacturaPro ExE",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "**/*",
+    "!dist/**/*",
+    "!build/**/*",
+    "!*.md",
+    "!eslint.config.js",
+    "!electron-builder.json"
+  ],
+  "win": {
+    "target": "nsis",
+    "icon": "assets/icon.ico",
+    "requestedExecutionLevel": "asInvoker"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "assets/icon.ico",
+    "uninstallerIcon": "assets/icon.ico",
+    "installerHeaderIcon": "assets/icon.ico",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "FacturaPro ExE",
+    "include": "build/installer.nsh",
+    "installerSidebar": "assets/installerSidebar.bmp",
+    "uninstallerSidebar": "assets/installerSidebar.bmp"
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "EdwinEstrella",
+    "repo": "FacturaProExE",
+    "private": false
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "assets/icon.icns"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "assets/icon.png"
+  }
+}

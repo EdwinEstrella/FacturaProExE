@@ -49,17 +49,29 @@ Desde el módulo de soporte puedes crear nuevos usuarios con diferentes permisos
 
 ## 📦 Generar Instalador (.exe)
 
-Para crear un instalador ejecutable:
-
+### Método Rápido (Recomendado)
 ```bash
-# Para Windows
-npm run build-win
+# Distribución completa automática
+node scripts/distribute.js
+```
+
+### Método Manual
+```bash
+# Para Windows con instalador
+npm run build-win-setup
 
 # Para distribución general
 npm run dist
 ```
 
 Los archivos generados estarán en la carpeta `dist/`.
+
+### Scripts de Distribución
+```bash
+npm run release       # Release patch automático
+npm run release-minor # Release minor automático
+npm run release-major # Release major automático
+```
 
 ## 🔄 Sistema de Actualizaciones
 
@@ -119,16 +131,66 @@ jobs:
 ### Proceso de Actualización
 
 1. **Crear nueva versión:**
-   ```bash
-   git tag v1.1.0
-   git push origin v1.1.0
-   ```
+    ```bash
+    # Automático (recomendado)
+    npm run release
+
+    # Manual
+    git tag v1.1.0
+    git push origin v1.1.0
+    ```
 
 2. **GitHub Actions** generará automáticamente el instalador
 
 3. **Los usuarios recibirán notificación** de actualización disponible
 
 4. **Actualización automática** se descarga e instala
+
+## 👥 Distribución a Usuarios Finales
+
+### Crear Primer Release
+
+Para crear tu primer release ejecutable:
+
+```bash
+# Método automático (recomendado)
+npm run distribute
+
+# O método manual
+npm run build-win-setup
+```
+
+### Publicar en GitHub
+
+1. **Ve a la página de releases:**
+   ```
+   https://github.com/EdwinEstrella/FacturaProExE/releases
+   ```
+
+2. **Crea un nuevo release:**
+   - Tag: `v1.0.0`
+   - Título: `FacturaPro ExE v1.0.0`
+   - Descripción: Copia de `RELEASE_TEMPLATE.md`
+
+3. **Adjunta el instalador:**
+   - Archivo: `dist/FacturaPro ExE 1.0.0.exe`
+
+### Descarga e Instalación para Usuarios
+
+1. **Descargar el instalador** desde la página de releases
+
+2. **Ejecutar el instalador** y seguir las instrucciones
+
+3. **Primer uso:**
+   - Usuario: `soporte`
+   - Contraseña: `[Configurada en el sistema]`
+
+### Actualizaciones Automáticas
+
+- ✅ **Detección automática** de nuevas versiones
+- ✅ **Descarga silenciosa** en segundo plano
+- ✅ **Instalación automática** al reiniciar
+- ✅ **Notificaciones** de actualizaciones disponibles
 
 ## 🗄️ Base de Datos
 

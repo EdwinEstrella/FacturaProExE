@@ -98,6 +98,17 @@ build/
 dist/
 release/
 
+# Distribution files (except examples)
+dist/*.exe
+!dist/example-setup.exe
+
+# Documentation files (keep templates)
+*.md
+!README.md
+!DISTRIBUCION.md
+!RELEASE_TEMPLATE.md
+!assets/README.md
+
 # OS generated files
 Thumbs.db
 ehthumbs.db
