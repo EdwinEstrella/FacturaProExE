@@ -18,8 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "build": {
-    "appId": "com.sistemafacturacion.app",
-    "productName": "Sistema de Gestión Empresarial",
+    "appId": "com.facturapro.app",
+    "productName": "FacturaPro ExE",
     "directories": {
       "output": "dist"
     },
@@ -32,7 +32,9 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "sign": false,
+      "verifyUpdateCodeSignature": false
     },
     "nsis": {
       "oneClick": false,
@@ -43,7 +45,7 @@
       "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Sistema Facturación"
+      "shortcutName": "FacturaPro ExE"
     },
     "publish": {
       "provider": "github",
