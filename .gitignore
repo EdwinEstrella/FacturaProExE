@@ -110,6 +110,13 @@ dist/*.exe
 !GITHUB_ACTIONS_GUIA.md
 !assets/README.md
 
+# Database files
+# Keep development database (template)
+!facturas.db
+# Ignore user databases (production)
+**/userData/facturas.db
+**/FacturaPro/facturas.db
+
 # OS generated files
 Thumbs.db
 ehthumbs.db

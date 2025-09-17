@@ -1,8 +1,98 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'facturas.db');
-const db = new sqlite3.Database(dbPath);
+class DatabaseManager {
+    constructor() {
+        this.db = null;
+        this.dbPath = this.getDatabasePath();
+        this.initDatabase();
+    }
+
+    getDatabasePath() {
+        // Verificar si estamos en desarrollo o producción
+        const isDev = process.env.NODE_ENV === 'development' ||
+                     !process.resourcesPath ||
+                     !process.resourcesPath.includes('app.asar');
+
+        if (isDev) {
+            // Desarrollo: usar directorio del proyecto
+            return path.join(__dirname, 'facturas.db');
+        } else {
+            // Producción: usar directorio de datos del usuario
+            try {
+                const { app } = require('electron');
+                const userDataPath = app.getPath('userData');
+                return path.join(userDataPath, 'facturas.db');
+            } catch (error) {
+                // Fallback si no se puede acceder a electron
+                const os = require('os');
+                const homeDir = os.homedir();
+                return path.join(homeDir, 'FacturaPro', 'facturas.db');
+            }
+        }
+    }
+
+    initDatabase() {
+        try {
+            // Asegurar que el directorio existe
+            const dir = path.dirname(this.dbPath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+                console.log('Directorio creado:', dir);
+            }
+
+            // Verificar si existe una base de datos template en recursos
+            const templateDbPath = this.getTemplateDatabasePath();
+            const dbExists = fs.existsSync(this.dbPath);
+
+            console.log('Ruta de base de datos:', this.dbPath);
+            console.log('¿Base de datos existe?', dbExists);
+
+            if (!dbExists && templateDbPath && fs.existsSync(templateDbPath)) {
+                console.log('Copiando base de datos template...');
+                fs.copyFileSync(templateDbPath, this.dbPath);
+                console.log('Base de datos template copiada exitosamente');
+            }
+
+            // Abrir/crear base de datos
+            this.db = new sqlite3.Database(this.dbPath, (err) => {
+                if (err) {
+                    console.error('Error al abrir base de datos:', err.message);
+                    console.error('Ruta intentada:', this.dbPath);
+                } else {
+                    console.log('Base de datos conectada correctamente en:', this.dbPath);
+                    this.createTables();
+                }
+            });
+
+        } catch (error) {
+            console.error('Error inicializando base de datos:', error);
+            console.error('Ruta intentada:', this.dbPath);
+        }
+    }
+
+    getTemplateDatabasePath() {
+        // Solo en producción, buscar template en recursos
+        if (process.resourcesPath && process.resourcesPath.includes('app.asar')) {
+            return path.join(process.resourcesPath, 'facturas.db');
+        }
+        return null;
+    }
+
+    createTables() {
+        // Las tablas se crean en el código existente más abajo
+        console.log('Base de datos inicializada correctamente');
+    }
+
+    getConnection() {
+        return this.db;
+    }
+}
+
+// Crear instancia del administrador de base de datos
+const dbManager = new DatabaseManager();
+const db = dbManager.getConnection();
 
 // Inicializar tablas
 db.serialize(() => {

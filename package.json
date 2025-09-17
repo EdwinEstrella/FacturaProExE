@@ -4,8 +4,8 @@
   "description": "Sistema de facturación con Electron",
   "main": "main.js",
   "scripts": {
-    "start": "npx electron .",
-    "dev": "npx electron .",
+    "start": "cross-env NODE_ENV=development npx electron .",
+    "dev": "cross-env NODE_ENV=development npx electron .",
     "build": "electron-builder",
     "build-win": "electron-builder --win",
     "build-win-setup": "electron-builder --win --publish=never",
@@ -14,6 +14,7 @@
     "publish": "electron-builder --publish=always",
     "distribute": "node scripts/distribute.js",
     "create-release": "node scripts/create-release.js",
+    "init-db": "node scripts/init-database.js",
     "release": "npm run create-release patch",
     "release-minor": "npm run create-release minor",
     "release-major": "npm run create-release major",
@@ -31,6 +32,12 @@
       "!build/**/*",
       "!*.md",
       "!eslint.config.js"
+    ],
+    "extraResources": [
+      {
+        "from": "facturas.db",
+        "to": "facturas.db"
+      }
     ],
     "win": {
       "target": "nsis",
@@ -63,6 +70,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.8",
+    "cross-env": "^7.0.3",
     "electron-log": "^5.0.1",
     "electron-updater": "^6.1.7",
     "pdfkit": "^0.17.2",
