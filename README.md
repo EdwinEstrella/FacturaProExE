@@ -116,17 +116,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-3. **Actualizar configuración en `package.json`:**
 
-```json
-"build": {
-  "publish": {
-    "provider": "github",
-    "owner": "tu-usuario",
-    "repo": "sistema-facturacion"
-  }
-}
-```
 
 ### Proceso de Actualización
 
